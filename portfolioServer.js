@@ -4,12 +4,6 @@ const express = require('express');
 
 const cors = require('cors');
 
-const data = require('./api');
-
-
-
-console.log('data here', data);
-
 const api = express();
 
 api.use(cors());
@@ -22,7 +16,7 @@ api.get('/', (req, res) => {
 });
 
 api.get('/data', (req, res) => {
-	res.status(200).json(data);
+	res.status(200).json("api is working");
 });
 
 api.listen(PORT, () => console.log(`API running at ${HOST}:${PORT}!`));
