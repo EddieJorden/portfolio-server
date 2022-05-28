@@ -28,7 +28,12 @@ api.get('/data', (req, res) => {
 
 api.post('/addItem', (req, res) =>  {
 	console.log('new post!', req.body)
+	item.push(req.body)
 	res.status(201).send('added Item')
+})
+
+api.get('/getItem', (req, res) => {
+	res.status(200).json(item)
 })
 
 api.listen(PORT, () => console.log(`API running at ${HOST}:${PORT}!`));
