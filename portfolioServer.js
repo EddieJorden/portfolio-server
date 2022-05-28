@@ -12,7 +12,7 @@ const item = []
 
 api.use(cors());
 api.use(express.json())
-api.use(express.urlencoded({extended: false}))
+api.use(express.urlencoded({extended: true}))
 
 
 const HOST = '0.0.0.0';
