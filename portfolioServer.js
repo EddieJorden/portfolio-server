@@ -6,7 +6,8 @@ const cors = require('cors');
 
 const api = express();
 
-const data = [{"name": "Eddie Moger"}, {"name": "Yuliya Moger"}]
+const data = require('./sampleData.json');
+
 
 api.use(cors());
 
@@ -18,7 +19,7 @@ api.get('/', (req, res) => {
 });
 
 api.get('/data', (req, res) => {
-	res.status(200).json(data);
+	res.status(200).json(data)
 });
 
 api.listen(PORT, () => console.log(`API running at ${HOST}:${PORT}!`));
