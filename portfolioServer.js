@@ -10,10 +10,8 @@ const data = require('./sampleData.json');
 
 let item = []
 
-
 api.use(express.json())
 api.use(express.urlencoded({extended: false}))
-
 
 const HOST = '0.0.0.0';
 const PORT = 8888;
@@ -28,7 +26,7 @@ api.get('/data', (req, res) => {
 
 api.post('/addItem', (req, res) =>  {
 	console.log('new post!', req.body)
-	item.push(req.body)
+	item = [...item, req.body]
 	res.status(201).send('added Item')
 })
 
