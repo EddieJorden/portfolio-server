@@ -8,7 +8,7 @@ const api = express();
 
 const data = require('./sampleData.json');
 
-const item = []
+let item = []
 
 
 api.use(express.json())
