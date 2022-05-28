@@ -10,9 +10,9 @@ const data = require('./sampleData.json');
 
 const item = []
 
-api.use(cors());
+
 api.use(express.json())
-api.use(express.urlencoded({extended: true}))
+api.use(express.urlencoded({extended: false}))
 
 
 const HOST = '0.0.0.0';
