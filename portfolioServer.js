@@ -2,8 +2,6 @@
 /* eslint-disable no-undef */
 const express = require('express');
 
-const cors = require('cors');
-
 const api = express();
 
 const data = require('./sampleData.json');
@@ -27,11 +25,18 @@ api.get('/data', (req, res) => {
 api.post('/addItem', (req, res) =>  {
 	console.log('new post!', req.body)
 	item = [...item, req.body]
-	res.status(201).send('added Item')
+	res.status(201).send(`added Item`)
+})
+
+api.post('/removeItemByName', (req, res) => {
+	console.log('item removed!')
+ const poppedItem = item.pop()
+	console.log('poppedItem', poppedItem)
+	res.status(202).send(`Removed Item`)
 })
 
 api.get('/getItem', (req, res) => {
 	res.status(200).json(item)
 })
 
-api.listen(PORT, () => console.log(`API running at ${HOST}:${PORT}!`));
+api.listen(PORT, () => console.log(`API listening at ${HOST}:${PORT}!`));
