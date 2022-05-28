@@ -8,7 +8,7 @@ const api = express();
 
 api.use(cors());
 
-const HOST = 'localhost';
+const HOST = '0.0.0.0';
 const PORT = 8888;
 
 api.get('/', (req, res) => {
