@@ -4,6 +4,10 @@ const express = require('express');
 
 const api = express();
 
+const cors = require('cors');
+
+api.use(cors())
+
 const data = require('./sampleData.json');
 
 let authorizedUsers = [{name: 'eddie'}]
@@ -28,6 +32,8 @@ api.use(express.urlencoded({extended: false}))
 
 const HOST = '0.0.0.0';
 const PORT = 8888;
+
+
 
 api.get('/', (req, res) => {
 	res.send('Welcome to EddieMoger.com');
