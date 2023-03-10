@@ -8,12 +8,6 @@ const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const limiter = rateLimit({
-	windowMs: 60 * 60 * 1000, // 1 hour
-	max: 3, // limit each IP to 100 requests per windowMs
-	message: 'Too many requests from this IP, please try again later',
-});
-
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -25,6 +19,12 @@ const PORT = 8888;
 
 let authorizedUsers = [{ name: 'eddie' }];
 let token = null;
+
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000, // 1 hour
+	max: 3, // limit each IP to 100 requests per windowMs
+	message: 'Too many requests from this IP, please try again later',
+});
 
 let getToken = () => {
 	token = Math.floor(Math.random(9999999) * 10000000);
