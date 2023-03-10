@@ -5,7 +5,14 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const data = require('./sampleData.json');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000, // 1 hour
+	max: 3, // limit each IP to 100 requests per windowMs
+	message: 'Too many requests from this IP, please try again later',
+});
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -85,7 +92,7 @@ app.get('/getItem', (req, res) => {
 const user = process.env.USER_NAME;
 const pass = process.env.USER_PASS;
 
-app.post('/send-email', (req, res) => {
+app.post('/send-email', limiter, (req, res) => {
 	// Get the form data from the request body
 	const name = req.body.name;
 	const email = req.body.email;
