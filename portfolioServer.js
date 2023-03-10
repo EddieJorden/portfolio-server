@@ -1,81 +1,132 @@
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable no-undef */
 const express = require('express');
-
-const api = express();
-
+const nodemailer = require('nodemailer');
 const cors = require('cors');
-
-api.use(cors())
-
 const data = require('./sampleData.json');
+const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
-let authorizedUsers = [{name: 'eddie'}]
-
-let token = null
-
-let getToken = () => {
-	token = Math.floor(Math.random(9999999) * 10000000)
-	let timeout = 1000 * 60
-	console.log(token)
-	setTimeout(() => {
-		token = null
-		console.log(token)
-	}, timeout)
-	return token
-}
-
-let item = []
-
-api.use(express.json())
-api.use(express.urlencoded({extended: false}))
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const HOST = '0.0.0.0';
 const PORT = 8888;
 
+let authorizedUsers = [{ name: 'eddie' }];
+let token = null;
 
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000, // 1 hour
+	max: 3, // limit each IP to 100 requests per windowMs
+	message: 'Too many requests from this IP, please try again later',
+});
 
-api.get('/', (req, res) => {
+let getToken = () => {
+	token = Math.floor(Math.random(9999999) * 10000000);
+	let timeout = 1000 * 60;
+	console.log(token);
+	setTimeout(() => {
+		token = null;
+		console.log(token);
+	}, timeout);
+	return token;
+};
+
+let item = [];
+
+app.get('/', (req, res) => {
 	res.send('Welcome to EddieMoger.com');
 });
 
-api.get('/data', (req, res) => {
-	res.status(200).json(data)
+app.get('/data', (req, res) => {
+	res.status(200).json(data);
 });
 
-api.get('/getUserToken', (req, res) => {
-	if(authorizedUsers.findIndex(user => user.name == req.body.name) != -1) {
-		if(token === null) {
-			token = getToken()
-		} res.status(200).json(token)
-	} res.status(404).json('user not found')
+app.get('/getUserToken', (req, res) => {
+	if (authorizedUsers.findIndex((user) => user.name == req.body.name) != -1) {
+		if (token === null) {
+			token = getToken();
+		}
+		res.status(200).json(token);
 	}
-)
+	res.status(404).json('user not found');
+});
 
-api.post('/addUser', (req, res) => {
-	if(authorizedUsers.findIndex(user => user.name == req.body.name) == -1 && authorizedUsers.findIndex(user => user.email == req.body.email) == -1) {
-		authorizedUsers = [...authorizedUsers, {name: req.body.name, email: req.body.email}]
-		console.log('user added ', authorizedUsers)
+app.post('/addUser', (req, res) => {
+	if (
+		authorizedUsers.findIndex((user) => user.name == req.body.name) == -1 &&
+		authorizedUsers.findIndex((user) => user.email == req.body.email) == -1
+	) {
+		authorizedUsers = [
+			...authorizedUsers,
+			{ name: req.body.name, email: req.body.email },
+		];
+		console.log('user added ', authorizedUsers);
 	}
-	console.log('user already exists', authorizedUsers)
-		res.status(202).send('user added')
-})
+	console.log('user already exists', authorizedUsers);
+	res.status(202).send('user added');
+});
 
-api.post('/addItem', (req, res) =>  {
-	console.log('new post!', req.body)
-	item = [...item, req.body]
-	res.status(201).send(`added Item`)
-})
+app.post('/addItem', (req, res) => {
+	console.log('new post!', req.body);
+	item = [...item, req.body];
+	res.status(201).send(`added Item`);
+});
 
-api.post('/removeItemByName', (req, res) => {
-	console.log('item removed!')
- const poppedItem = item.pop()
-	console.log('poppedItem', poppedItem)
-	res.status(202).send(`Removed Item`)
-})
+app.post('/removeItemByName', (req, res) => {
+	console.log('item removed!');
+	const poppedItem = item.pop();
+	console.log('poppedItem', poppedItem);
+	res.status(202).send(`Removed Item`);
+});
 
-api.get('/getItem', (req, res) => {
-	res.status(200).json(item)
-})
+app.get('/getItem', (req, res) => {
+	res.status(200).json(item);
+});
 
-api.listen(PORT, () => console.log(`API listening at ${HOST}:${PORT}!`));
+const user = process.env.USER_NAME;
+const pass = process.env.USER_PASS;
+
+app.post('/send-email', limiter, (req, res) => {
+	// Get the form data from the request body
+	const name = req.body.name;
+	const email = req.body.email;
+	const message = req.body.message;
+
+	// Create a reusable transporter object using SMTP transport
+	let transporter = nodemailer.createTransport({
+		service: 'Gmail',
+		auth: {
+			user: user,
+			pass: pass,
+		},
+	});
+
+	// Setup email data with unicode symbols
+	let mailOptions = {
+		from: `"${name}: ${email} " <${email}>`, // sender address
+		replyTo: email, // reply to address
+		to: 'eddie@eddiemoger.com', // list of receivers
+		subject: 'New message from EddieMoger.com', // Subject line
+		text: message, // plain text body
+		html: `<p>${message}</p>`, // html body
+	};
+
+	// Send the email using the transporter object
+	transporter.sendMail(mailOptions, (error, info) => {
+		if (error) {
+			console.log(error);
+			res.status(500).send('An error occurred while sending the email');
+		} else {
+			console.log('Email sent:', info.response);
+			res.status(200).send('Email sent successfully');
+		}
+	});
+});
+
+app.listen(PORT, () => console.log(`Server listening at ${HOST}:${PORT}!`));
